@@ -1,0 +1,154 @@
+/* style.css */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    color: #000;
+    overflow-x: hidden;
+    
+    /* Nền */
+    background: 
+        url('nenchao.png') no-repeat center center fixed,
+        linear-gradient(rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0.78)),
+        linear-gradient(rgba(45, 45, 45, 0.95), rgba(45, 45, 45, 0.95));
+    
+    background-size: 
+        105% auto,   /* nenchao.png rộng hơn */
+        cover, 
+        cover;
+    background-position: center;
+}
+
+/* Container chính */
+.container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 12px;
+    max-width: 100%;
+    margin: 0 auto;
+    width: 100%;
+}
+
+/* Tiêu đề Nhạc Lễ Nam Bộ */
+.header-title {
+    margin-top: 5px;
+    margin-bottom: 10px;
+    text-align: center;
+    width: 100%;
+}
+
+.header-title h1 {
+    font-size: 2.1rem;
+    font-weight: 700;
+    color: #FFD700;                    /* Màu vàng */
+    text-shadow: 
+        -2px -2px 0 #fff,
+        2px -2px 0 #fff,
+        -2px 2px 0 #fff,
+        2px 2px 0 #fff,
+            letter-spacing: 1px;
+    text-transform: ;
+}
+
+/* Grid nút */
+.button-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    width: 100%;
+    max-width: 360px;
+    margin-top: 5px;
+}
+
+/* Button */
+.music-btn {
+    background: url('button.png') no-repeat center / contain;
+    border: none;
+    outline: none;
+    width: 100%;
+    min-height: 90px;
+    padding: 10px 35px;           /* Giảm padding dọc vì chữ to hơn */
+    font-size: 1rem;
+    font-weight: 800;
+    color: #000000;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1.35;
+    border-radius: 14px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+    transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+}
+
+.music-btn:active {
+    transform: scale(0.92) translateY(3px);
+    box-shadow: 0 5px 14px rgba(0, 0, 0, 0.5);
+    filter: brightness(0.90);
+}
+
+@media (hover: hover) {
+    .music-btn:hover {
+        transform: scale(1.03);
+        box-shadow: 0 14px 26px rgba(0, 0, 0, 0.45);
+    }
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .header-title h1 {
+        font-size: 1.85rem;
+    }
+    .button-grid {
+        gap: 15px;
+        margin-top: 10px;
+    }
+    .music-btn {
+        min-height: 96px;
+        font-size: 1.0rem;
+        padding: 16px 18px;
+    }
+}
+
+@media (max-width: 480px) {
+    .header-title h1 {
+        font-size: 1.7rem;
+    }
+    .music-btn {
+        font-size: 0.97rem;
+    }
+}
+
+/* Footer */
+.footer {
+    background: rgba(0, 0, 0, 0.82);
+    color: #ffffff;
+    text-align: center;
+    padding: 20px 15px;
+    font-size: 10px;
+    line-height: 1.5;
+    font-weight: 500;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+    width: 100%;
+    margin-top: auto;
+}
+
+@keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0.3; }
+    100% { opacity: 1; }
+}
