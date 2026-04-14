@@ -1,24 +1,46 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-    // ====================== PWA OFFLINE ======================
+    // ====================== PWA + PROGRESS OFFLINE ======================
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/service-worker.js')
+        navigator.serviceWorker.register('/nhaclenambo/service-worker.js')
             .then(reg => {
-                console.log('✅ Service Worker đăng ký thành công - Ứng dụng sẵn sàng dùng Offline');
+                console.log('✅ Service Worker đăng ký thành công');
             })
             .catch(err => {
                 console.log('❌ Service Worker lỗi:', err);
             });
     }
 
+    // Progress elements
+    const progressFill = document.getElementById('progress-fill');
+    const progressText = document.getElementById('progress-text');
+
+    function updateProgress(percent) {
+        progressFill.style.width = percent + '%';
+        progressText.textContent = `Đã Tải: ${Math.round(percent)}%`;
+        
+        if (percent >= 100) {
+            setTimeout(() => {
+                progressText.innerHTML = '✅ Đã Tải Xong – Có thể dùng Offline';
+                progressText.style.color = '#00FF88';
+            }, 600);
+        }
+    }
+
+    // Nhận tiến độ từ Service Worker
+    navigator.serviceWorker.addEventListener('message', event => {
+        if (event.data && event.data.type === 'CACHE_PROGRESS') {
+            updateProgress(event.data.percent);
+        }
+    });
+
+    // ====================== MUSIC PLAYER CODE (giữ nguyên logic cũ) ======================
     const buttons = document.querySelectorAll('.music-btn');
 
     let currentMain = null;
     let currentMainBtn = null;
-
     let currentKen = null;
     let currentKenBtn = null;
-
     let holdTimeout = null;
 
     const noLoopList = ['audio-1','audio-4','audio-9','audio-10','audio-15'];
@@ -41,7 +63,6 @@ document.addEventListener('DOMContentLoaded', () => {
         function endPress(e){
             e.preventDefault();
             clearTimeout(holdTimeout);
-
             if(Date.now() - pressStart < 500){
                 handleClick(id, button);
             }
@@ -65,7 +86,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if(type === 'ken'){
             let audio = document.getElementById(id);
-
             if(currentKen === audio){
                 if(!audio.paused){
                     audio.pause();
@@ -76,7 +96,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 return;
             }
-
             stopKen();
             playKen(id, btn);
             return;
@@ -97,7 +116,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         stopMain();
         stopXaCao();
-
         playMain(id, btn);
     }
 
@@ -108,65 +126,53 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function playMain(id, btn){
-        // TRỐNG TƯ FIX
         if(id === 'audio-3'){
             let first = document.getElementById('audio-3');
             let second = document.getElementById('audio-3b');
-
             first.pause(); second.pause();
             first.currentTime = 0; second.currentTime = 0;
-            first.onended = null; second.onended = null; second.ontimeupdate = null;
+            first.onended = null; second.ontimeupdate = null;
 
             first.play();
             setPlaying(btn);
             currentMainBtn = btn;
 
             first.onended = () => {
-                first.onended = null;
                 first.pause();
-
                 second.currentTime = 0;
                 second.play();
-
                 second.ontimeupdate = () => {
                     if(second.duration && second.currentTime >= second.duration - 0.1){
                         second.currentTime = 0;
                         second.play();
                     }
                 };
-
                 currentMain = second;
             };
             return;
         }
 
-        // XÀ CÀO FIX
         if(id === 'audio-14'){
             let first = document.getElementById('audio-14a');
             let second = document.getElementById('audio-14b');
-
             first.pause(); second.pause();
             first.currentTime = 0; second.currentTime = 0;
-            first.onended = null; second.onended = null; second.ontimeupdate = null;
+            first.onended = null; second.ontimeupdate = null;
 
             first.play();
             setPlaying(btn);
             currentMainBtn = btn;
 
             first.onended = () => {
-                first.onended = null;
                 first.pause();
-
                 second.currentTime = 0;
                 second.play();
-
                 second.ontimeupdate = () => {
                     if(second.duration && second.currentTime >= second.duration - 0.1){
                         second.currentTime = 0;
                         second.play();
                     }
                 };
-
                 currentMain = second;
             };
             return;
@@ -188,7 +194,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function setupAudio(audio, btn, id){
         audio.onended = null;
         audio.ontimeupdate = null;
-
         audio.play();
 
         if(!noLoopList.includes(id)){
@@ -211,7 +216,6 @@ document.addEventListener('DOMContentLoaded', () => {
             currentMain.currentTime = 0;
         }
         if(currentMainBtn) resetButton(currentMainBtn);
-
         currentMain = null;
         currentMainBtn = null;
     }
@@ -222,7 +226,6 @@ document.addEventListener('DOMContentLoaded', () => {
             currentKen.currentTime = 0;
         }
         if(currentKenBtn) resetButton(currentKenBtn);
-
         currentKen = null;
         currentKenBtn = null;
     }
@@ -242,9 +245,7 @@ document.addEventListener('DOMContentLoaded', () => {
             a.pause();
             a.currentTime = 0;
         });
-
         document.querySelectorAll('.music-btn').forEach(resetButton);
-
         currentMain = null;
         currentKen = null;
     }
