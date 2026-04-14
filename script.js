@@ -126,12 +126,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 first.onended = null;
                 first.pause();
 
-                second.currentTime = 0;
+                second.currentTime = 0.1;
                 second.play();
 
                 // 🔥 CHỈ LOOP SECOND
                 second.ontimeupdate = () => {
-                    if(second.duration && second.currentTime >= second.duration - 0){
+                    if(second.duration && second.currentTime >= second.duration - 0.18){
                         second.currentTime = 0;
                         second.play();
                     }
@@ -172,7 +172,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 second.play();
 
                 second.ontimeupdate = () => {
-                    if(second.duration && second.currentTime >= second.duration - 0){
+                    if(second.duration && second.currentTime >= second.duration - 0.18){
                         second.currentTime = 0;
                         second.play();
                     }
@@ -210,7 +210,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if(!noLoopList.includes(id)){
             audio.ontimeupdate = () => {
-                if(audio.duration && audio.currentTime >= audio.duration - 0){
+                if(audio.duration && audio.currentTime >= audio.duration - 0.18){
                     audio.currentTime = 0;
                     audio.play();
                 }
