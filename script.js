@@ -1,4 +1,16 @@
 document.addEventListener('DOMContentLoaded', () => {
+
+    // ====================== PWA OFFLINE ======================
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/service-worker.js')
+            .then(reg => {
+                console.log('✅ Service Worker đăng ký thành công - Ứng dụng sẵn sàng dùng Offline');
+            })
+            .catch(err => {
+                console.log('❌ Service Worker lỗi:', err);
+            });
+    }
+
     const buttons = document.querySelectorAll('.music-btn');
 
     let currentMain = null;
@@ -23,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
         function startPress(e){
             e.preventDefault();
             pressStart = Date.now();
-            holdTimeout = setTimeout(() => stopAll(),500);
+            holdTimeout = setTimeout(() => stopAll(), 500);
         }
 
         function endPress(e){
@@ -95,43 +107,29 @@ document.addEventListener('DOMContentLoaded', () => {
         return document.getElementById(id);
     }
 
-    // =========================
     function playMain(id, btn){
-
-        // 🔥 TRỐNG TƯ FIX
+        // TRỐNG TƯ FIX
         if(id === 'audio-3'){
             let first = document.getElementById('audio-3');
             let second = document.getElementById('audio-3b');
 
-            // reset hoàn toàn
-            first.pause();
-            second.pause();
-
-            first.currentTime = 0;
-            second.currentTime = 0;
-
-            // 🔥 QUAN TRỌNG: clear sự kiện cũ
-            first.onended = null;
-            second.onended = null;
-            second.ontimeupdate = null;
+            first.pause(); second.pause();
+            first.currentTime = 0; second.currentTime = 0;
+            first.onended = null; second.onended = null; second.ontimeupdate = null;
 
             first.play();
             setPlaying(btn);
-
             currentMainBtn = btn;
 
             first.onended = () => {
-
-                // 🔥 hủy luôn first
                 first.onended = null;
                 first.pause();
 
                 second.currentTime = 0;
                 second.play();
 
-                // 🔥 CHỈ LOOP SECOND
                 second.ontimeupdate = () => {
-                    if(second.duration && second.currentTime >= second.duration - 0){
+                    if(second.duration && second.currentTime >= second.duration - 0.1){
                         second.currentTime = 0;
                         second.play();
                     }
@@ -139,32 +137,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 currentMain = second;
             };
-
             return;
         }
 
-        // 🔥 XÀ CÀO FIX tương tự
+        // XÀ CÀO FIX
         if(id === 'audio-14'){
             let first = document.getElementById('audio-14a');
             let second = document.getElementById('audio-14b');
 
-            first.pause();
-            second.pause();
-
-            first.currentTime = 0;
-            second.currentTime = 0;
-
-            first.onended = null;
-            second.onended = null;
-            second.ontimeupdate = null;
+            first.pause(); second.pause();
+            first.currentTime = 0; second.currentTime = 0;
+            first.onended = null; second.onended = null; second.ontimeupdate = null;
 
             first.play();
             setPlaying(btn);
-
             currentMainBtn = btn;
 
             first.onended = () => {
-
                 first.onended = null;
                 first.pause();
 
@@ -172,7 +161,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 second.play();
 
                 second.ontimeupdate = () => {
-                    if(second.duration && second.currentTime >= second.duration - 0){
+                    if(second.duration && second.currentTime >= second.duration - 0.1){
                         second.currentTime = 0;
                         second.play();
                     }
@@ -180,29 +169,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 currentMain = second;
             };
-
             return;
         }
 
         let audio = document.getElementById(id);
-
         currentMain = audio;
         currentMainBtn = btn;
-
         setupAudio(audio, btn, id);
     }
 
     function playKen(id, btn){
         let audio = document.getElementById(id);
-
         currentKen = audio;
         currentKenBtn = btn;
-
         setupAudio(audio, btn, id);
     }
 
     function setupAudio(audio, btn, id){
-
         audio.onended = null;
         audio.ontimeupdate = null;
 
@@ -210,12 +193,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if(!noLoopList.includes(id)){
             audio.ontimeupdate = () => {
-                if(audio.duration && audio.currentTime >= audio.duration - 0){
+                if(audio.duration && audio.currentTime >= audio.duration - 0.1){
                     audio.currentTime = 0;
                     audio.play();
                 }
             };
-        }else{
+        } else {
             audio.onended = () => resetButton(btn);
         }
 
@@ -245,7 +228,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function stopXaCao(){
-        ['audio-14a','audio-14b'].forEach(id=>{
+        ['audio-14a','audio-14b'].forEach(id => {
             let a = document.getElementById(id);
             if(a){
                 a.pause();
@@ -255,7 +238,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function stopAll(){
-        document.querySelectorAll('audio').forEach(a=>{
+        document.querySelectorAll('audio').forEach(a => {
             a.pause();
             a.currentTime = 0;
         });
