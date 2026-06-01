@@ -1,80 +1,57 @@
 /**
- * script.js - Phiên bản tối ưu gối đầu tuyệt đối không khựng nhịp (Precise Scheduling)
- * Phát triển bởi: Trần Cường - Tối ưu vòng lặp chuyển đoạn Trống Tư và Xà Cào
+ * script.js - PHIÊN BẢN CHUẨN HÓA SIÊU TỐC ĐỘ & VÒNG LẶP KHÍT RỊT
+ * Tối ưu hóa bởi: Trần Cường - Bấm phát hát ngay, gối đầu mượt như VLC
  */
 
 document.addEventListener('DOMContentLoaded', () => {
     const buttons = document.querySelectorAll('.music-btn');
 
-    // Quản lý các đối tượng phát nhạc Howler
-    let currentMainSound = null;
-    let currentMainId = null; 
+    let currentMain = null;
     let currentMainBtn = null;
 
-    let currentKenSound = null;
-    let currentKenId = null;  
+    let currentKen = null;
     let currentKenBtn = null;
-
-    // Quản lý riêng đối tượng phát nối đoạn dự phòng để dập tắt chính xác
-    let nextQueuedSound = null; 
 
     let holdTimeout = null;
 
-    // Danh sách các ID nút KHÔNG ĐƯỢC PHÁT LẶP
+    // Danh sách các ID nút KHÔNG ĐƯỢC PHÁT LẶP (chạy 1 lần rồi thôi)
     const noLoopList = ['audio-1', 'audio-4', 'audio-9', 'audio-10', 'audio-15'];
 
-    // Bản đồ cấu hình ánh xạ từ data-audio-id sang file mp3 vật lý
-    const audioMap = {
-        'audio-1': 'trongdandunggia.mp3',
-        'audio-2': 'raobongtu.mp3',
-        'audio-3': 'daubongtu.mp3',      // Đoạn đầu Trống Tư
-        'audio-3b': 'giuabongtu.mp3',    // Đoạn giữa Trống Tư
-        'audio-4': 'dutbongtu.mp3',
-        'audio-5': 'kentrungmoc.mp3',
-        'audio-6': 'kentrunghoixuan.mp3',
-        'audio-7': 'chauchieng.mp3',
-        'audio-8': 'giuatrongchien.mp3',
-        'audio-9': 'duttrongchien.mp3',
-        'audio-10': 'diembo.mp3',
-        'audio-11': 'nhactran.mp3',
-        'audio-12': 'nhactrubo.mp3',
-        'audio-13': 'neuxacao.mp3',
-        'audio-14a': 'xacaodau.mp3',     // Đoạn đầu Xà Cào
-        'audio-14b': 'xacaogiua.mp3',    // Đoạn giữa Xà Cào
-        'audio-15': 'xacaodut.mp3',
-        'audio-16': 'niemadidaphat.mp3',
-        'audio-17': 'motcoidive.mp3',
-        'audio-18': 'longmedanbau.mp3',
-        'audio-19': 'tinhchasao.mp3',
-        'audio-20': 'hoatauconhac.mp3',
-        'audio-21': 'kennghinhthien.mp3'
-    };
-
-    // Đăng ký sự kiện tương tác trên hệ thống nút bấm
+    // CHỐNG TRÙNG LỆNH TRÊN DI ĐỘNG: Cấu hình bắt sự kiện chạm chuẩn xác nhất
     buttons.forEach(button => {
         const id = button.dataset.audioId;
-
-        button.addEventListener('mousedown', startPress);
-        button.addEventListener('mouseup', endPress);
-        button.addEventListener('touchstart', startPress);
-        button.addEventListener('touchend', endPress);
-
         let pressStart = 0;
+        let isHandling = false; // Biến khóa chống trùng mousedown và touchstart sát nhau
 
-        function startPress(e) {
+        // Định nghĩa hàm xử lý chung khi người dùng bắt đầu chạm/nhấn nút
+        const onPressStart = (e) => {
             e.preventDefault();
             pressStart = Date.now();
-            holdTimeout = setTimeout(() => stopAll(), 500);
-        }
+            holdTimeout = setTimeout(() => stopAll(), 500); // Nhấn giữ 0.5 giây tắt hết sạch nhạc
+        };
 
-        function endPress(e) {
+        // Định nghĩa hàm xử lý khi người dùng thả nút ra
+        const onPressEnd = (e) => {
             e.preventDefault();
             clearTimeout(holdTimeout);
 
+            // Nếu thả ra trong vòng dưới 0.5 giây -> Tính là cú Click phát nhạc
             if (Date.now() - pressStart < 500) {
+                if (isHandling) return; // Nếu đang xử lý rồi thì bỏ qua sự kiện trùng
+                isHandling = true;
+                
                 handleClick(id, button);
+                
+                // Mở khóa sau 100ms để sẵn sàng cho cú bấm tiếp theo
+                setTimeout(() => { isHandling = false; }, 100);
             }
-        }
+        };
+
+        // Gán sự kiện cho cả Máy tính và Điện thoại cảm ứng
+        button.addEventListener('mousedown', onPressStart);
+        button.addEventListener('mouseup', onPressEnd);
+        button.addEventListener('touchstart', onPressStart, { passive: false });
+        button.addEventListener('touchend', onPressEnd, { passive: false });
     });
 
     function getType(id) {
@@ -86,192 +63,176 @@ document.addEventListener('DOMContentLoaded', () => {
     function handleClick(id, btn) {
         const type = getType(id);
 
+        // 1. XỬ LÝ NHÓM SOLO (ĐÀN DỘI DỰNG GIÁ)
         if (type === 'solo') {
             stopAll();
             playMain(id, btn);
             return;
         }
 
+        // 2. XỬ LÝ NHÓM KÈN (KÈN TRUNG)
         if (type === 'ken') {
-            if (currentKenId === id && currentKenSound) {
-                if (currentKenSound.playing()) {
-                    currentKenSound.pause();
+            let a = document.getElementById(id);
+            if (!a) return;
+
+            if (currentKen === a) {
+                if (!a.paused) {
+                    a.pause();
                     setPaused(btn);
                 } else {
-                    currentKenSound.play();
+                    a.play().catch(err => console.log(err));
                     setPlaying(btn);
                 }
                 return;
             }
+
             stopKen();
-            playKen(id, btn);
+            currentKen = a;
+            currentKenBtn = btn;
+            a.currentTime = 0;
+            a.play().catch(err => console.log(err));
+            setPlaying(btn);
             return;
         }
 
-        if (currentMainId === id && currentMainSound) {
-            if (currentMainSound.playing() || (nextQueuedSound && nextQueuedSound.playing())) {
-                if (currentMainSound.playing()) currentMainSound.pause();
-                if (nextQueuedSound && nextQueuedSound.playing()) nextQueuedSound.pause();
-                setPaused(btn);
-            } else {
-                if (currentMainSound && currentMainSound.duration() && currentMainSound.seek() < currentMainSound.duration()) {
-                    currentMainSound.play();
-                } else if (nextQueuedSound) {
-                    nextQueuedSound.play();
-                }
-                setPlaying(btn);
-            }
+        // 3. XỬ LÝ NHÓM MAIN (HÒA TẤU, KÈN NGHINH THIÊN, TRỐNG TƯ, XÀ CÀO...)
+        if (currentMainBtn === btn) {
+            // Nếu bấm lại đúng cái nút đang phát -> Tắt lập tức nhóm Main
+            stopMain();
+            stopSpecialTransitions();
             return;
         }
 
+        // Nếu bấm nút mới -> Dập nút cũ ngay lập tức và nổ nhạc mới
         stopMain();
+        stopSpecialTransitions();
         playMain(id, btn);
     }
 
-    function createHowl(srcFile, shouldLoop) {
-        return new Howl({
-            src: [srcFile],
-            html5: false, // Ép nạp thẳng Web Audio API để quản lý đồng hồ mili-giây
-            preload: true,
-            loop: shouldLoop
-        });
-    }
+    // KỸ THUẬT GỐI ĐẦU TOÁN HỌC: Giúp đoạn ĐẦU và GIỮA khớp nhau khít rịt không vết xước
+    function setupSeamlessTransition(firstAudioId, secondAudioId, btn) {
+        const firstAudio = document.getElementById(firstAudioId);
+        const secondAudio = document.getElementById(secondAudioId);
+        if (!firstAudio || !secondAudio) return;
 
-    // Hàm xử lý kích hoạt chuỗi gối đầu chính xác cao
-    function setupSeamlessTransition(firstFile, secondFile, button, targetId) {
-        let firstSound = createHowl(firstFile, false);
-        let secondSound = createHowl(secondFile, true);
-        
-        currentMainSound = firstSound;
-        nextQueuedSound = secondSound;
-        setPlaying(button);
+        currentMain = firstAudio;
+        currentMainBtn = btn;
 
-        // Kích hoạt phát file đầu tiên
-        firstSound.play();
+        firstAudio.currentTime = 0;
+        secondAudio.currentTime = 0;
+        secondAudio.loop = true; // Đoạn giữa tự động lặp vô tận
 
-        // Lắng nghe khi file đã tải xong cấu trúc, lập lịch tính toán thời gian gối đầu
-        firstSound.on('load', () => {
-            const durationMs = firstSound.duration() * 1000;
-            
-            // Lên lịch gối đầu trước khi file 1 kết thúc 20 mili-giây (Triệt tiêu hoàn toàn khoảng hụt của MP3)
-            const triggerTime = durationMs - 20; 
+        // Nổ nhạc đoạn đầu ngay lập tức từ bộ nhớ Blob offline của máy anh
+        firstAudio.play().catch(err => console.log(err));
+        setPlaying(btn);
 
-            setTimeout(() => {
-                // Kiểm tra nếu người dùng chưa bấm nút khác và đúng ID mục tiêu
-                if (currentMainId === targetId && firstSound.playing()) {
-                    currentMainSound = secondSound; // Chuyển giao quyền kiểm soát chính sang file giữa
-                    secondSound.play();
-                }
-            }, triggerTime);
-        });
+        let transitioned = false;
 
-        // Phòng hờ nếu setTimeout lệch nhịp, on('end') vẫn làm nhiệm vụ bọc lót cuối cùng
-        firstSound.on('end', () => {
-            if (currentMainId === targetId && !secondSound.playing()) {
-                currentMainSound = secondSound;
-                secondSound.play();
+        // Theo dõi thời gian thực của file: Bắn lệnh phát đoạn giữa sớm trước khi đoạn đầu hết 0.08 giây
+        // Khoảng bù trừ siêu nhỏ này sẽ triệt tiêu hoàn toàn lỗi khựng âm thanh mặc định của file MP3
+        firstAudio.ontimeupdate = () => {
+            const timeLeft = firstAudio.duration - firstAudio.currentTime;
+            if (timeLeft <= 0.08 && !transitioned) {
+                transitioned = true;
+                secondAudio.play().catch(err => console.log(err));
+                currentMain = secondAudio; // Giao quyền điều khiển chính cho đoạn giữa
             }
-        });
+        };
+
+        firstAudio.onended = () => {
+            firstAudio.ontimeupdate = null;
+            if (!transitioned) {
+                secondAudio.play().catch(err => console.log(err));
+                currentMain = secondAudio;
+            }
+        };
     }
 
     function playMain(id, btn) {
-        currentMainId = id;
-        currentMainBtn = btn;
-
-        // 🔥 XỬ LÝ KHÔNG KHỰNG: TRỐNG TƯ (Nối đầu -> giữa tính toán trước thời gian)
+        // 🔥 ĐẶC BIỆT: Kích hoạt chuỗi gối đầu mượt cho Trống Tư
         if (id === 'audio-3') {
-            setupSeamlessTransition(audioMap['audio-3'], audioMap['audio-3b'], btn, 'audio-3');
+            setupSeamlessTransition('audio-3', 'audio-3b', btn);
             return;
         }
 
-        // 🔥 XỬ LÝ KHÔNG KHỰNG: XÀ CÀO (Nối đầu -> giữa tính toán trước thời gian)
+        // 🔥 ĐẶC BIỆT: Kích hoạt chuỗi gối đầu mượt cho Xà Cào
         if (id === 'audio-14') {
-            setupSeamlessTransition(audioMap['audio-14a'], audioMap['audio-14b'], btn, 'audio-14');
+            setupSeamlessTransition('audio-14a', 'audio-14b', btn);
             return;
         }
 
-        // Dành cho các nút nhạc thông thường
+        // Phát nhạc cho tất cả các nút thông thường còn lại (Hòa Tấu, Kèn Nghinh Thiên...)
+        let a = document.getElementById(id);
+        if (!a) return;
+
+        currentMain = a;
+        currentMainBtn = btn;
+        a.currentTime = 0;
+
         const isLoop = !noLoopList.includes(id);
-        let soundFile = audioMap[id];
-        
-        if (!soundFile) return;
+        a.loop = isLoop;
 
-        let sound = createHowl(soundFile, isLoop);
-        currentMainSound = sound;
+        // Lệnh phát tức thì ra loa
+        a.play().catch(err => console.log("Lỗi lệnh play:", err));
         setPlaying(btn);
-
-        sound.play();
 
         if (!isLoop) {
-            sound.on('end', () => {
+            a.onended = () => {
                 resetButton(btn);
-                if (currentMainId === id) {
-                    currentMainSound = null;
-                    currentMainId = null;
+                if (currentMain === a) {
+                    currentMain = null;
                     currentMainBtn = null;
                 }
-            });
+            };
         }
-    }
-
-    function playKen(id, btn) {
-        currentKenId = id;
-        currentKenBtn = btn;
-        
-        let soundFile = audioMap[id];
-        if (!soundFile) return;
-
-        let sound = createHowl(soundFile, true);
-        currentKenSound = sound;
-        setPlaying(btn);
-
-        sound.play();
     }
 
     function stopMain() {
-        if (currentMainSound) {
-            currentMainSound.stop();
-            currentMainSound.unload();
-        }
-        if (nextQueuedSound) {
-            nextQueuedSound.stop();
-            nextQueuedSound.unload();
+        if (currentMain) {
+            currentMain.pause();
+            currentMain.currentTime = 0;
+            currentMain.ontimeupdate = null;
         }
         if (currentMainBtn) resetButton(currentMainBtn);
 
-        currentMainSound = null;
-        nextQueuedSound = null;
-        currentMainId = null;
+        currentMain = null;
         currentMainBtn = null;
     }
 
     function stopKen() {
-        if (currentKenSound) {
-            currentKenSound.stop();
-            currentKenSound.unload();
+        if (currentKen) {
+            currentKen.pause();
+            currentKen.currentTime = 0;
         }
         if (currentKenBtn) resetButton(currentKenBtn);
 
-        currentKenSound = null;
-        currentKenId = null;
+        currentKen = null;
         currentKenBtn = null;
     }
 
+    function stopSpecialTransitions() {
+        ['audio-3', 'audio-3b', 'audio-14a', 'audio-14b'].forEach(id => {
+            let a = document.getElementById(id);
+            if (a) {
+                a.pause();
+                a.currentTime = 0;
+                a.ontimeupdate = null;
+            }
+        });
+    }
+
     function stopAll() {
-        Howler.stop(); 
+        document.querySelectorAll('audio').forEach(a => {
+            a.pause();
+            a.currentTime = 0;
+            a.ontimeupdate = null;
+        });
+
         document.querySelectorAll('.music-btn').forEach(resetButton);
 
-        if (currentMainSound) currentMainSound.unload();
-        if (nextQueuedSound) nextQueuedSound.unload();
-        if (currentKenSound) currentKenSound.unload();
-
-        currentMainSound = null;
-        nextQueuedSound = null;
-        currentMainId = null;
+        currentMain = null;
+        currentKen = null;
         currentMainBtn = null;
-
-        currentKenSound = null;
-        currentKenId = null;
         currentKenBtn = null;
     }
 
