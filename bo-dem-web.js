@@ -8,7 +8,7 @@ const ASSETS_TO_CACHE = [
     './index.html',
     './style.css',
     './script.js',
-    './kiemchung.js',
+    './goodoffline.js',
     './button.png',
     './nenchao.png'
 ];
