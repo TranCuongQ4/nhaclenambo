@@ -53,14 +53,24 @@ body {
 
 .header-title h1 {
     font-size: 2.1rem;
-    font-weight: 700;
-    color: #FFD700; /* Màu vàng */
-    text-shadow: 
-        -2px -2px 0 #fff,
-        2px -2px 0 #fff,
-        -2px 2px 0 #fff,
-        2px 2px 0 #fff; /* CHỖ NÀY: Đã sửa thành dấu chấm phẩy hợp lệ */
-    letter-spacing: 1px;
+    font-weight: 800; /* Tăng độ dày chữ lên để hiệu ứng 3D nhìn rõ hơn */
+    letter-spacing: 1.5px;
+    text-transform: uppercase; /* Viết hoa toàn bộ chữ cho sang trọng */
+    text-align: center;
+
+    /* 1. TẠO MÀU VÀNG GOLD GRADIENT (MÀU KIM LOẠI) */
+    background: linear-gradient(to bottom, #FFE066 0%, #F5B041 40%, #CC8800 70%, #663300 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+
+    /* 2. TẠO HIỆU ỨNG NỔI 3D (Đổ bóng nhiều lớp xếp chồng lên nhau) */
+    filter: drop-shadow(0px 1px 0px #996600)
+            drop-shadow(0px 2px 0px #885500)
+            drop-shadow(0px 3px 0px #774400)
+            drop-shadow(0px 4px 0px #663300)
+            drop-shadow(0px 5px 0px #552200)
+            drop-shadow(2px 5px 6px rgba(0, 0, 0, 0.7)); /* Lớp bóng mờ ngoài cùng để tạo độ sâu */
 }
 
 /* Grid nút */
