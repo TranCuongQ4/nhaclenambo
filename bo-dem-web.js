@@ -2,7 +2,7 @@
  * bo-dem-web.js - Quản lý bộ đệm khung ứng dụng (App Shell)
  * Đảm bảo nạp trang web Nhạc Lễ Nam Bộ khi không có mạng internet.
  */
-const CACHE_NAME = 'nhac-le-nam-bo-v4';
+const CACHE_NAME = 'nhac-le-nam-bo-v5';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
