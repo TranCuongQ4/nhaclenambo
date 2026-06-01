@@ -1,4 +1,4 @@
-/* style.css */
+/* style.css - Đã sửa lỗi cho anh Cường */
 
 * {
     margin: 0;
@@ -12,6 +12,8 @@ body {
     display: flex;
     flex-direction: column;
     color: #000;
+    /* Cho phép cuộn dọc tự nhiên để không bao giờ bị mất nút */
+    overflow-y: auto; 
     overflow-x: hidden;
     
     /* Nền */
@@ -21,7 +23,7 @@ body {
         linear-gradient(rgba(45, 45, 45, 0.95), rgba(45, 45, 45, 0.95));
     
     background-size: 
-        105% auto,   /* nenchao.png rộng hơn */
+        105% auto,
         cover, 
         cover;
     background-position: center;
@@ -37,6 +39,8 @@ body {
     max-width: 100%;
     margin: 0 auto;
     width: 100%;
+    /* Thêm khoảng cách đáy để danh sách nút không dính sát footer */
+    padding-bottom: 40px; 
 }
 
 /* Tiêu đề Nhạc Lễ Nam Bộ */
@@ -50,23 +54,22 @@ body {
 .header-title h1 {
     font-size: 2.1rem;
     font-weight: 700;
-    color: #FFD700;                    /* Màu vàng */
+    color: #FFD700; /* Màu vàng */
     text-shadow: 
         -2px -2px 0 #fff,
         2px -2px 0 #fff,
         -2px 2px 0 #fff,
-        2px 2px 0 #fff,
-            letter-spacing: 1px;
-    text-transform: ;
+        2px 2px 0 #fff; /* CHỖ NÀY: Đã sửa thành dấu chấm phẩy hợp lệ */
+    letter-spacing: 1px;
 }
 
 /* Grid nút */
 .button-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
+    gap: 12px;
     width: 100%;
-    max-width: 360px;
+    max-width: 380px;
     margin-top: 5px;
 }
 
@@ -76,18 +79,18 @@ body {
     border: none;
     outline: none;
     width: 100%;
-    min-height: 90px;
-    padding: 10px 35px;           /* Giảm padding dọc vì chữ to hơn */
-    font-size: 1rem;
+    min-height: 85px; /* Điều chỉnh nhẹ để vừa vặn layout mobile */
+    padding: 10px 15px;
+    font-size: 0.95rem;
     font-weight: 800;
     color: #000000;
     text-align: center;
     display: flex;
     align-items: center;
     justify-content: center;
-    line-height: 1.35;
+    line-height: 1.3;
     border-radius: 14px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
     transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
     cursor: pointer;
     user-select: none;
@@ -108,19 +111,19 @@ body {
     }
 }
 
-/* Responsive */
+/* Responsive thiết bị di động */
 @media (max-width: 600px) {
     .header-title h1 {
         font-size: 1.85rem;
     }
     .button-grid {
-        gap: 15px;
+        gap: 12px;
         margin-top: 10px;
     }
     .music-btn {
-        min-height: 96px;
-        font-size: 1.0rem;
-        padding: 16px 18px;
+        min-height: 85px;
+        font-size: 0.95rem;
+        padding: 10px 12px;
     }
 }
 
@@ -129,7 +132,8 @@ body {
         font-size: 1.7rem;
     }
     .music-btn {
-        font-size: 0.97rem;
+        font-size: 0.9rem;
+        min-height: 80px;
     }
 }
 
